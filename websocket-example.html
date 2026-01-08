@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo WebSocket - Pokedex</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .event-log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .event-item {
+            padding: 8px;
+            margin: 5px 0;
+            border-left: 3px solid #007bff;
+            background-color: white;
+        }
+        .event-item strong {
+            color: #007bff;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔌 WebSocket - Pokedex</h1>
+        
+        <div id="status" class="status disconnected">
+            Desconectado
+        </div>
+        
+        <div>
+            <button id="connectBtn" onclick="connect()">Conectar</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Desconectar</button>
+            <button onclick="joinRoom()">Unirse a la Sala</button>
+        </div>
+        
+        <h2>Eventos Recibidos:</h2>
+        <div id="eventLog" class="event-log">
+            <p>Esperando conexión...</p>
+        </div>
+    </div>
+
+    <script>
+        let socket = null;
+        const eventLog = document.getElementById('eventLog');
+        const statusDiv = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+
+        function addEventLog(event, data) {
+            const eventItem = document.createElement('div');
+            eventItem.className = 'event-item';
+            const timestamp = new Date().toLocaleTimeString();
+            eventItem.innerHTML = `<strong>[${timestamp}] ${event}:</strong> ${JSON.stringify(data, null, 2)}`;
+            eventLog.insertBefore(eventItem, eventLog.firstChild);
+        }
+
+        function updateStatus(connected) {
+            if (connected) {
+                statusDiv.textContent = '✅ Conectado';
+                statusDiv.className = 'status connected';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+            } else {
+                statusDiv.textContent = '❌ Desconectado';
+                statusDiv.className = 'status disconnected';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+            }
+        }
+
+        function connect() {
+            // Conectar al namespace /pokemon
+            socket = io('http://localhost:3000/pokemon', {
+                transports: ['websocket', 'polling']
+            });
+
+            socket.on('connect', () => {
+                addEventLog('connect', { socketId: socket.id });
+                updateStatus(true);
+            });
+
+            socket.on('connected', (data) => {
+                addEventLog('connected', data);
+            });
+
+            socket.on('joined', (data) => {
+                addEventLog('joined', data);
+            });
+
+            socket.on('pokemon-created', (pokemon) => {
+                addEventLog('pokemon-created', pokemon);
+            });
+
+            socket.on('pokemon-updated', (pokemon) => {
+                addEventLog('pokemon-updated', pokemon);
+            });
+
+            socket.on('pokemon-deleted', (data) => {
+                addEventLog('pokemon-deleted', data);
+            });
+
+            socket.on('pokemon-list', (pokemons) => {
+                addEventLog('pokemon-list', pokemons);
+            });
+
+            socket.on('disconnect', () => {
+                addEventLog('disconnect', {});
+                updateStatus(false);
+            });
+
+            socket.on('error', (error) => {
+                addEventLog('error', error);
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+                updateStatus(false);
+                addEventLog('disconnect', { message: 'Desconectado manualmente' });
+            }
+        }
+
+        function joinRoom() {
+            if (socket && socket.connected) {
+                socket.emit('join-room', {});
+            } else {
+                alert('Primero debes conectarte');
+            }
+        }
+
+        // Auto-conectar al cargar la página
+        window.onload = () => {
+            // No auto-conectar, dejar que el usuario lo haga manualmente
+        };
+    </script>
+</body>
+</html>
+
