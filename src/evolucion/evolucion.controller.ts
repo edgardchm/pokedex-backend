@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Post, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Post, Body, Patch, Delete } from '@nestjs/common';
 import { EvolucionService, EvolutionNode } from './evolucion.service';
 import { SetEvolutionDto } from './dto/set-evolution.dto';
 import { Pokemon } from '../entities/pokemon.entity';
@@ -51,5 +51,13 @@ export class EvolucionController {
       setEvolutionDto.pokemonId,
       setEvolutionDto.evolvesFromId,
     );
+  }
+
+  @Delete('clear/:id')
+  @ApiOperation({ summary: 'Limpiar la relación de evolución de un Pokémon por ID' })  // Descripción en Swagger
+  async clearEvolution(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.evolucionService.clearEvolution(id);
   }
 }

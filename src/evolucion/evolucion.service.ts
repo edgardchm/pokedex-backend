@@ -152,4 +152,22 @@ export class EvolucionService {
     pokemon.evolves_from_id = evolvesFromId;
     return this.pokemonRepository.save(pokemon);
   }
+
+  /**
+   * Elimina la relación de evolución de un Pokémon específico
+   * @param pokemonId - ID del Pokémon al que se le limpiará la evolución
+   * @returns Promise<void>
+   */
+  async clearEvolution(pokemonId: number): Promise<void> {
+    const pokemon = await this.pokemonRepository.findOne({
+      where: { id: pokemonId },
+    });
+
+    if (!pokemon) {
+      throw new NotFoundException(`Pokemon con ID ${pokemonId} no encontrado`);
+    }
+
+    pokemon.evolves_from_id = null;
+    await this.pokemonRepository.save(pokemon);
+  }
 }
