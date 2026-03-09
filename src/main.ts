@@ -28,6 +28,7 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('pokemon', 'Endpoints relacionados con Pokémons')
     .addTag('type', 'Endpoints relacionados con Tipos')
+    .addTag('evolution', 'Endpoints relacionados con Evoluciones')
     .build();
   
   const document = SwaggerModule.createDocument(app, config);

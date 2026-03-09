@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { PokemonModule } from './pokemon/pokemon.module';
 import { TypeModule } from './type/type.module';
+import { EvolucionModule } from './evolucion/evolucion.module';
 import { Pokemon } from './entities/pokemon.entity';
 import { Type } from './entities/type.entity';
 
@@ -27,6 +28,7 @@ import { Type } from './entities/type.entity';
     }),
     PokemonModule,
     TypeModule,
+    EvolucionModule,
   ],
 })
 export class AppModule {}

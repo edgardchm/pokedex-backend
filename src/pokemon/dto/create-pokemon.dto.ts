@@ -18,6 +18,15 @@ export class CreatePokemonDto {
   name: string;
 
   /**
+   * Número del Pokémon en la Pokédex Nacional
+   * Opcional: número único que identifica al Pokémon en la Pokédex
+   */
+  @ApiPropertyOptional({ description: 'Número del Pokémon en la Pokédex', example: 25 })
+  @IsNumber()
+  @IsOptional()
+  pokedex_number?: number;
+
+  /**
    * Altura del Pokémon en decímetros (1 decímetro = 10 cm)
    * Ejemplo: 4 = 40 cm
    */
@@ -69,5 +78,14 @@ export class CreatePokemonDto {
   @IsString({ each: true })  // Valida que cada elemento del array sea una cadena
   @IsOptional()
   typeNames?: string[];
+
+  /**
+   * ID del Pokémon del cual evoluciona
+   * Opcional: null si es la forma base de la cadena evolutiva
+   */
+  @ApiPropertyOptional({ description: 'ID del Pokémon del cual evoluciona', example: 24 })
+  @IsNumber()
+  @IsOptional()
+  evolves_from_id?: number;
 }
 
