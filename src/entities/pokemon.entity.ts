@@ -1,4 +1,4 @@
-// Importaciones de TypeORM para definir la entidad de base de datos
+// Importaciones necesarias de TypeORM y la entidad Type.
 import {
   Entity,              // Decorador para marcar la clase como una entidad
   Column,             // Decorador para definir columnas de la tabla
@@ -12,79 +12,43 @@ import {
 } from 'typeorm';
 import { Type } from './type.entity';
 
-/**
- * Entidad Pokemon que representa la tabla 'pokemons' en la base de datos
- * Define la estructura de datos de un Pokémon y su relación con los tipos
- */
-@Entity('pokemons')  // Especifica el nombre de la tabla en la base de datos
+// Entidad principal de Pokemon.
+@Entity('pokemons')
 export class Pokemon {
-  /**
-   * ID único del Pokémon
-   * Se genera automáticamente por la base de datos (auto-increment)
-   */
-  @PrimaryGeneratedColumn()  // Columna de clave primaria auto-generada
+  // ID interno autogenerado.
+  @PrimaryGeneratedColumn()
   id: number;
 
-  /**
-   * Número del Pokémon en la Pokédex Nacional
-   * Columna de tipo entero único
-   */
+  // Numero en la Pokedex nacional.
   @Column({ unique: true, nullable: true })
   pokedex_number: number;
 
-  /**
-   * Nombre del Pokémon
-   * Columna de tipo texto (VARCHAR)
-   */
-  @Column()  // Define una columna estándar en la tabla
+  // Nombre del Pokemon.
+  @Column()
   name: string;
 
-  /**
-   * Altura del Pokémon en decímetros
-   * Tipo decimal con precisión de 5 dígitos y 2 decimales (ej: 999.99)
-   */
+  // Altura en decimetros.
   @Column('decimal', { precision: 5, scale: 2 })
   height: number;
 
-  /**
-   * Peso del Pokémon en hectogramos
-   * Tipo decimal con precisión de 5 dígitos y 2 decimales
-   */
+  // Peso en hectogramos.
   @Column('decimal', { precision: 5, scale: 2 })
   weight: number;
 
-  /**
-   * Experiencia base que otorga el Pokémon
-   * Columna de tipo entero
-   */
+  // Experiencia base que entrega al derrotarlo.
   @Column()
   base_experience: number;
 
-  /**
-   * URL de la imagen (sprite) del Pokémon
-   * Columna de tipo texto para almacenar la URL
-   */
+  // URL del sprite principal.
   @Column()
   sprite_url: string;
 
-  /**
-   * Fecha y hora de creación del registro
-   * Se establece automáticamente cuando se crea el Pokémon
-   */
-  @CreateDateColumn()  // Se actualiza automáticamente al crear el registro
+  // Fecha de creacion del registro.
+  @CreateDateColumn()
   created_at: Date;
 
-  /**
-   * Relación muchos a muchos con la entidad Type
-   * Un Pokémon puede tener múltiples tipos (ej: Fuego y Volador)
-   * Un tipo puede pertenecer a múltiples Pokémon
-   * 
-   * @JoinTable define la tabla intermedia 'pokemon_types' que conecta
-   * las dos entidades. Esta tabla tiene:
-   * - pokemon_id: referencia al ID del Pokémon
-   * - type_id: referencia al ID del Tipo
-   */
-  @ManyToMany(() => Type, (type) => type.pokemons)  // Relación bidireccional
+  // Tipos asociados al Pokemon.
+  @ManyToMany(() => Type, (type) => type.pokemons)
   @JoinTable({
     name: 'pokemon_types',  // Nombre de la tabla intermedia
     joinColumn: { name: 'pokemon_id', referencedColumnName: 'id' },  // Columna que referencia a Pokemon
@@ -92,25 +56,16 @@ export class Pokemon {
   })
   types: Type[];  // Array de tipos asociados al Pokémon
 
-  /**
-   * ID del Pokémon del cual evoluciona este Pokémon
-   * Es null si el Pokémon es la forma base (no evoluciona de nadie)
-   */
+  // ID del Pokemon previo en la cadena evolutiva.
   @Column({ nullable: true })
   evolves_from_id: number;
 
-  /**
-   * Relación muchos a uno con el Pokémon predecesor en la cadena evolutiva
-   * Permite obtener el Pokémon del cual evoluciona
-   */
+  // Referencia al Pokemon del que evoluciona.
   @ManyToOne(() => Pokemon, (pokemon) => pokemon.evolutions, { nullable: true })
   @JoinColumn({ name: 'evolves_from_id' })
   evolves_from: Pokemon;
 
-  /**
-   * Relación uno a muchos con los Pokémon que evolucionan de este
-   * Permite obtener todas las evoluciones posibles (ej: Gloom → Vileplume o Bellossom)
-   */
+  // Lista de evoluciones que parten de este Pokemon.
   @OneToMany(() => Pokemon, (pokemon) => pokemon.evolves_from)
   evolutions: Pokemon[];
 }
