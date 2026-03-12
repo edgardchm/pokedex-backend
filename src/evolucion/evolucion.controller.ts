@@ -53,6 +53,12 @@ export class EvolucionController {
     );
   }
 
+  /**
+   * DELETE /evolution/clear/:id
+   * Limpia la relación de evolución de un Pokémon específico
+    * @param id - ID del Pokémon
+    * @return Promise<void> - No retorna contenido
+   */
   @Delete('clear/:id')
   @ApiOperation({ summary: 'Limpiar la relación de evolución de un Pokémon por ID' })  // Descripción en Swagger
   async clearEvolution(
